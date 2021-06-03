@@ -1,0 +1,94 @@
+clc;clear;close all;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% GECAD PESGM, CEC, and GECCO 2021 Competition: Evolutionary Computation in Uncertain Environments: A Smart Grid Application
+% Updated 29/03/2021
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+addpath('functions') %Necessary functions to run the algorithms (encrypted)
+tTotalTime=tic; %lets track total computational time
+
+Select_testbed=2;
+%Testbed 1: Optimal bidding in local energy markets
+%Testbed 2: Flexibility management of home appliances to support DSO requests
+
+Select_Algorithm=2;
+%1: HyDE-DF algorithm (test algorithm)
+%2: Your algorithm
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Load MH parameters (e.g., get MH parameters from DEparameters.m file)
+switch Select_Algorithm
+    case 1
+        addpath('HyDE-DF/')
+        algorithm='HyDEDF'; %'The participants should include their algorithm here'
+        DEparameters; %Function defined by the participant
+        No_solutions=deParameters.I_NP; %Notice that some algorithms are limited to one individual
+        
+    case 2
+        algorithm='CBCC-RDG3_CMA-ES';
+        DEparameters
+        No_solutions=deParameters.I_NP;
+    otherwise
+        fprintf(1,'No algorithm selected\n');
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Load Data base
+noRuns=20; %this can be changed but final results should be based on 20 trials
+DB=Select_testbed;
+% 1: Case study testbed 1
+% 2: Case study testbed 2
+
+[caseStudyData, DB_name]=callDatabase(DB);
+
+%% Label of the algorithm and the case study
+Tag.algorithm=algorithm;
+Tag.DB=DB_name;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Set other parameters
+otherParameters =setOtherParameters(caseStudyData,No_solutions,Select_testbed);
+otherParameters.one=setOtherParameters(caseStudyData,1,Select_testbed);
+% %% Set lower/upper bounds of variables
+[lowerB,upperB] = setVariablesBounds(caseStudyData,otherParameters, Select_testbed);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Call the MH for optimizationclear
+ResDB=struc([]);
+for iRuns=1:noRuns %Number of trails
+    tOpt=tic;
+    rand('state',sum(noRuns*100*clock))% ensure stochastic indpt trials
+    otherParameters.iRuns=iRuns;
+    
+    switch Select_Algorithm
+        case 1
+            [ResDB(iRuns).Fit_and_p, ...
+                ResDB(iRuns).sol, ...
+                ResDB(iRuns).fitVector]= ...
+                HyDE(deParameters,caseStudyData,otherParameters,lowerB,upperB);
+        case 2
+            fprintf('iRuns = %d\n', iRuns);
+            [ResDB(iRuns).fit_and_p, ...
+                ResDB(iRuns).sol, ...
+                ResDB(iRuns).fitVector]= ...
+                SGC_framework(caseStudyData,otherParameters,lowerB,upperB);
+    end
+    
+    ResDB(iRuns).tOpt=toc(tOpt); % time of each trial
+    if iRuns > 1
+        if length(ResDB(iRuns).fitVector) > length(ResDB(iRuns-1).fitVector)
+            addLen = length(ResDB(iRuns).fitVector) - length(ResDB(iRuns-1).fitVector);
+            for i = 1:(iRuns-1)
+                ResDB(i).fitVector = [ResDB(i).fitVector nan(1, addLen)];
+            end
+        elseif length(ResDB(iRuns).fitVector) < length(ResDB(iRuns-1).fitVector)
+            addLen = length(ResDB(iRuns-1).fitVector) - length(ResDB(iRuns).fitVector);
+            ResDB(iRuns).fitVector = [ResDB(iRuns).fitVector nan(1, addLen)];
+        end
+    end
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    %% Save the results and stats
+    Save_results
+end
+tTotalTime=toc(tTotalTime); %Total time
+%% End of MH Optimization

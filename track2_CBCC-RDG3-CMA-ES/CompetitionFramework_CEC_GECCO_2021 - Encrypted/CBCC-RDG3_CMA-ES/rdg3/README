@@ -1,0 +1,31 @@
+This directory contains all the necessary files for running the Recursive Differential
+Grouping 3 algorithm for decomposing the CEC'2013 benchmark problems.
+
+-----------
+References:
+-----------
+Sun Y, Li X, Erst A, Omidvar, M N. Decomposition for Large-scale Optimization Problems with Overlapping Components. In 2019 IEEE Congress on Evolutionary Computation (CEC), pp. 326-333. IEEE, 2019. 
+ 
+Sun Y, Kirley M, Halgamuge S K. A Recursive Decomposition Method for 
+Large Scale Continuous Optimization[J]. IEEE Transactions on 
+Evolutionary Computation, 22, no. 5 (2018): 647-661. 
+https://ieeexplore.ieee.org/abstract/document/8122017
+
+----------------------
+Files and directories:
+----------------------
+ - benchmark   : this directory contains the CEC'2013 benchmark problems.
+ - RDG3.m      : the Recursive Differential Grouping 3 algorithm.
+ - INTERACT.m  : this file is used to identify the interaction between two sets of decision variables.
+ - README      : the readme file.
+ - results     : the output of Recursive Differential Grouping 3 is saved in this directory.
+ - run.m       : this file should be executed to start the Recursive Differential Grouping 3 algorithm.
+
+--------
+License:
+--------
+This program is to be used under the terms of the GNU General Public License 
+(http://www.gnu.org/copyleft/gpl.html).
+Author: Yuan SUN
+e-mail: yuan.sun@rmit.edu.au OR suiyuanpku@gmail.com
+Copyright notice: (c) 2019 Yuan SUN
