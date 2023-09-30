@@ -1,5 +1,6 @@
 # CMAESCC-RDG3
 Code was originally created for competition - CMAESCC-RDG3  for Call for Competition on Evolutionary Computation in the Energy Domain: Smart Grid Applications 2021 http://www.gecad.isep.ipp.pt/ERM-competitions/2021-2/ 
+
 Results were bublished in the article Optimizing DSO Requests Management Flexibility for Home Appliances Using CBCC-RDG3
 
 This article covers a case study with homes equipped with multiple appliances for energy consumption. 
